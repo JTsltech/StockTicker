@@ -1,37 +1,59 @@
-﻿using StockTicker.Models;
-using StockTicker.services;
+﻿using Authentication.Models;
+using Authentication.services;
+using Microsoft.AspNet.Identity;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
+using YahooFinanceApi;
 
-namespace StockTicker.Controllers
+namespace Authentication.Controllers
 {
-    public class StocksController : Controller
+	public class StocksController : Controller
     {
-        // GET: Stocks
-        
-
-		[HttpGet]
-		public async Task<ActionResult> Index(string searchString,string start,string end)
+		public ActionResult Stocks()
 		{
-			StockApiServices services = new StockApiServices();
-			IEnumerable<StockPriceModel> views = new List<StockPriceModel>();
+			return View();
+		}
+
+
+		// GET: Stocks
+		[HttpPost]
+		public async Task<ActionResult> GetData(string searchString, string start, string end)
+		{
+			var user_id = User.Identity.GetUserId();
+
+			ViewBag.searchString = searchString;
+
+			ViewBag.Id = user_id;
+			StockPriceModel models = new StockPriceModel();
 
 			if (!String.IsNullOrEmpty(searchString))
 			{
-				 views = await services.FindStocks(searchString, start, end);
-				
-				//Console.WriteLine(views.ToList());
+				models = await GetStockQuote(searchString);
 			}
 
-			return View(views.ToList());
+			return View("Stocks", models);
 		}
 
-		
+
+		public async Task<StockPriceModel> GetStockQuote(string ticker)
+		{
+			var securities = await Yahoo.Symbols(ticker).Fields("Name", "Price", "weekHigh", "weekLow", "Change", "ChangePercent").Fields(Field.LongName, Field.RegularMarketPrice, Field.FiftyTwoWeekHigh, Field.FiftyTwoWeekLow, Field.RegularMarketChange, Field.RegularMarketChangePercent).QueryAsync();
+			var security = securities[ticker.ToUpper()];
+			security.Fields.TryGetValue(ticker, out dynamic key);
+			StockPriceModel models = new StockPriceModel()
+			{
+				Ticker = ticker,
+				Name = security.LongName,
+				Change = security.RegularMarketChange,
+				ChangePercent = security.RegularMarketChangePercent,
+				weekHigh = security.FiftyTwoWeekHigh,
+				weekLow = security.FiftyTwoWeekLow
+			};
+
+			return models;
+		}
 	}
 }
