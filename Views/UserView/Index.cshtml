@@ -1,0 +1,45 @@
+﻿@model IEnumerable<Authentication.Models.UserStock>
+@{
+    ViewBag.Title = "Index";
+}
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.ticker)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Change)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ChangePercent)
+        </th>
+        <th></th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ticker)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Change)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ChangePercent)
+            </td>
+            <td>
+                @Html.ActionLink("Details", "GetDataValues", "Home", new { searchString = item.ticker }, null)
+            </td>
+            <td>
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+

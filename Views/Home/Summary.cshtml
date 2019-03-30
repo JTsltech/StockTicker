@@ -1,0 +1,68 @@
+﻿@model Authentication.Models.StockSummary
+
+<ul style="column-count:2;height:100px;">
+    <li>
+        <b>Ticker</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.Ticker)</label>
+    </li>
+    <li>
+        <b>Name</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.Name)</label>
+    </li>
+    <li>
+        <b>dayHigh</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.dayHigh)</label>
+    </li>
+    <li>
+        <b>dayLow</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.dayLow)</label>
+    </li>
+    <li>
+        <b>Open</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.Open)</label>
+    </li>
+    <li>
+        <b>Close</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.Close)</label>
+    </li>
+    <li>
+        <b>DateString</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.DateString)</label>
+    </li>
+    <li>
+        <b>EPS</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.EPS)</label>
+    </li>
+    <li>
+        <b>Bid</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.Bid)</label>
+    </li>
+    <li>
+        <b>Ask</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.Ask)</label>
+    </li>
+    <li>
+        <b>AskSize</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.AskSize)</label>
+    </li>
+    <li>
+        <b>BidSize</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.BidSize)</label>
+    </li>
+    <li>
+        <b>Currency</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.Currency)</label>
+    </li>
+    <li>
+        <b>Market Cap</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.market)</label>
+    </li>
+    <li>
+        <b>Volume</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.Volume)</label>
+    </li>
+    <li>
+        <b>Average Volume</b>
+        <label style="float:right">@Html.DisplayTextFor(model => model.AverageDailyVolume)</label>
+    </li>
+</ul>

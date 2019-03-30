@@ -1,31 +1,297 @@
-﻿@{
+﻿@using Authentication.Models
+@{
     ViewBag.Title = "Home Page";
+    string searchString = ViewBag.searchString;
+    var stocks = ViewBag.stock as List<StockList>;
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+<link href="~/Content/style.css" rel="stylesheet" />
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-horizontal">
+                <hr />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="row">
+                    <div class="col-sm-offset-3 col-sm-6 ">
+                        <div class="card">
+                            <div class="card-body card-block">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label>Ticker/Symbol</label>
+                                        @if (!searchString.IsEmpty())
+                                        {
+                                            <select class="form-control" id="searchString" disabled>
+                                                <option></option>
+                                                @foreach (var item in stocks)
+                                                {
+                                                    if (item.ticker == searchString)
+                                                    {
+                                                        <option value="@item.ticker" selected>@item.name</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.ticker">@item.name</option>
+                                                    }
+
+                                                }
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <select class="form-control" id="searchString">
+                                                <option></option>
+                                                @foreach (var item in stocks)
+                                                {
+                                                    <option value="@item.ticker">@item.name</option>
+                                                }
+                                            </select>
+                                        }
+
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label>Start Date</label><span>(optional)</span>
+                                        <input id="start" type="text" name="start" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label>End Date</label><span>(optional)</span>
+                                        <input id="end" type="text" name="end" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <button id="submit" style="margin:auto;" class="btn btn-block btn-success" type="button">Search</button>
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <button type="button" style="margin:auto;" class="btn btn-block btn-danger" id="btnData">Historical Data</button>
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <button type="button" style="margin:auto;" class="btn btn-block btn-primary" id="chart">Charts</button>
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <button type="button" style="margin:auto;" class="btn btn-info btn-block" id="btnAdd">Add</button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+
+
+<input type="hidden" value="@ViewBag.Id" id="userId" />
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="" id="summary">
+
+            </div>
+        </div>
     </div>
 </div>
+
+
+<ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#home">View Data</a></li>
+</ul>
+
+<div class="tab-content" style="margin-top:10px;">
+    <div id="home" class="tab-pane fade in active">
+
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <label class="label label-success">Open Value Chart</label>
+                <div id="mychart"></div>
+
+                <label class="label label-success">High Low Value Chart</label>
+                <div id="linechart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section scripts{
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            $('#submit').click(function () {
+                var ticker = $("#searchString");
+                var id = $("#userId");
+                var user = {};
+                user.searchString = ticker.val();
+                user.user_Id = id.val();
+                console.log(user);
+                $.ajax({
+                    type: "POST",
+                    url: 'http://localhost:53590/Home/GetData',
+                    data: JSON.stringify(user),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        var str = '<ul class="specs-ul"> <li><b>Ticker</b> <label style="float:right">' + data['Ticker'] + '</label></li><li><b>Name</b><label style="float:right">' + data['Name'] + '</label></li>';
+
+                        str += '<li><b>Open</b><label style="float:right">' + data['Open'] + '</label></li> <li><b>Close</b><label style="float:right">' + data['Close'] + '</label></li>';
+                        str += '<li><b>Bid</b><label style="float:right">' + data['Bid'] + '</label></li><li><b>Ask</b> <label style="float:right">' + data['Ask'] + '</label></li>';
+                        str += '<li><b>AskSize</b><label style="float:right">' + data['AskSize'] + '</label> </li><li><b>BidSize</b><label style="float:right">' + data['BidSize'] + '</label></li>';
+                        str += '<li><b>Currency</b><label style="float:right">' + data['Currency'] + '</label></li><li><b>Market Cap</b><label style="float:right">' + data['market'] + '</label></li>';
+                        str += '<li><b>Volume</b> <label style="float:right">' + data['Volume'] + '</label> </li><li><b>Average Volume</b><label style="float:right">' + data['AverageDailyVolume'] + '</label></li></ul>';
+                        $("#home").html(str);
+
+                        var percent = data['ChangePercent'];
+                        if (percent < 0) {
+                            $(document).on('DOMNodeInserted', function (e) {
+                                $('#color').addClass('red');
+                            });
+                        }
+                        else {
+
+                            $(document).on('DOMNodeInserted', function (e) {
+                                $('#color').addClass('green');
+                            });
+                        }
+                        var html = '<div class="container"> <div class="row"><div class="col-sm-6"><label style="font-weight:bold;font-size:20px;">' + data['Name'] + '</label><span> <label style="font-size:14px;">(' + data['Ticker'] + ')</label></span><div style="margin-top:10px">';
+                        html += '<label style="font-size:36px;margin-right:10px;">' + data['Change'] + '</label><span style="font-size:24px" id="color">' + data['ChangePercent'] + '%</span></div></div></div></div>';
+                        $("#summary").html(html);
+                    }
+                });
+            });
+
+            $("#btnData").click(function () {
+
+                var ticker = $("#searchString");
+                var id = $("#userId");
+                var start = $("#start");
+                var end = $("#end");
+                var user = {};
+                user.searchString = ticker.val();
+                user.user_Id = id.val();
+
+                user.start = start.val();
+                user.end = end.val();
+                console.log(user);
+                $.ajax({
+                    type: "POST",
+                    url: "http://localhost:53590/HistoricalData/HistoricalData",
+                    data: JSON.stringify(user),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+
+                        var html = '<table class="table"><tr><th>Ticker</th><th>Volume</th><th>High</th><th>Low</th><th>Open</th><th>Close</th></tr>';
+
+                        $.each(data, function (indx, value) {
+                            html += '<tr><td>' + value['Ticker'] + '</td><td>' + value['Volume'] + '</td><td>' + value['High'] + '</td><td>' + value['Low'] + '</td><td>' + value['Open'] + '</td><td>' + value['Close'] + '</td></tr>';
+                        });
+                        html += '</table>';
+
+                        $("#home").html(html);
+                    }
+                });
+            });
+
+            $('#btnAdd').click(function () {
+                var ticker = $("#searchString");
+                var id = $("#userId");
+                var start = $("#start");
+                var end = $("#end");
+                var user = {};
+                user.ticker = ticker.val();
+                user.user_Id = id.val();
+                user.start = start.val();
+                user.end = end.val();
+                console.log(user);
+                $.ajax({
+                    type: "POST",
+                    url: 'http://localhost:53590/UserView/Create',
+                    data: JSON.stringify(user),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+
+                });
+            });
+
+            $("#chart").click(function () {
+
+                var ticker = $("#searchString");
+                var id = $("#userId");
+                var start = $("#start");
+                var end = $("#end");
+                var user = {};
+                var arr = [];
+                user.searchString = ticker.val();
+                user.user_Id = id.val();
+                user.start = start.val();
+                user.end = end.val();
+
+                console.log(user);
+                $.ajax({
+                    type: "POST",
+                    url: "http://localhost:53590/HistoricalData/HistoricalData",
+                    data: JSON.stringify(user),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+
+                        $.each(data, function (index, item) {
+                            date = new Date(item['Date']);
+                            open = item['Open'];
+                            close = item['Close'];
+                            high = item['High'];
+                            low = item['Low'];
+                            volume = item['Volume'];
+
+                            arr.push({ date: date.toLocaleDateString(), Open: open, Close: close, High: high, Low: low, Volume: volume });
+                        });
+                        console.log(arr);
+
+                        Morris.Bar({
+                            element: 'mychart',
+                            data: arr,
+                            xkey: 'date',
+                            ykeys: ['Open'],
+                            labels: ['Open'],
+                            lineColors: ['#fc8710', '#FF6541', '#A4ADD3'],
+                            parseTime: false,
+                            hideHover: 'auto',
+                            xLabels: 'day'
+
+                        });
+
+                        Morris.Line({
+                            element: 'linechart',
+                            data: arr,
+                            xkey: 'date',
+                            ykeys: ['High', 'Low'],
+                            labels: ['High', 'Low'],
+                            lineColors: ['#A4ADD3', '#FF6541'],
+                            parseTime: false,
+                            hideHover: 'auto',
+
+                        });
+
+                    }
+                });
+            });
+
+        });
+    </script>
+
+}

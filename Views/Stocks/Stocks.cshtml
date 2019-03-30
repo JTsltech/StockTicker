@@ -1,0 +1,24 @@
+﻿
+
+
+@model Authentication.Models.StockPriceModel
+@{
+    ViewBag.Title = "Stocks";
+
+}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <label style="font-weight:bold;font-size:20px;">@Html.DisplayTextFor(model => model.Name)</label><span> <label style="font-size:14px;">(@Html.DisplayTextFor(model => model.Ticker))</label></span>
+
+
+            <div style="margin-top:10px">
+                <label style="font-size:36px">@Html.DisplayTextFor(model => model.Change)</label>
+                <span style="font-size:24px">@Html.DisplayTextFor(model => model.ChangePercent)%</span>
+            </div>
+        </div>
+    </div>
+</div>
+

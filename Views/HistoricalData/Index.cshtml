@@ -1,0 +1,46 @@
+﻿@model IEnumerable<Authentication.Models.StockPriceModel>
+
+@{
+    ViewBag.Title = "HistoricalData";
+
+
+}
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Ticker)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Volume)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.High)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Low)
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ticker)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Volume)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.High)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Low)
+            </td>
+
+        </tr>
+    }
+
+</table>
+
